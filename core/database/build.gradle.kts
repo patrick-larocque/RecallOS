@@ -18,3 +18,8 @@ dependencies {
 
     testImplementation(libs.androidx.room.testing)
 }
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", "true")
+}

@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.patricklarocque.recallos.core.model.ExecutionMode
 
 @Composable
 fun SettingsScreen(contentPadding: PaddingValues) {
@@ -21,7 +20,6 @@ fun SettingsScreen(contentPadding: PaddingValues) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(text = "Settings")
-        Text(text = "Execution modes stay explicit and centralized.")
-        Text(text = "Default mode: ${ExecutionMode.LOCAL_PREFERRED.name}")
+        Text(text = "Execution modes, privacy controls, and storage settings will land here.")
     }
 }

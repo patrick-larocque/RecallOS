@@ -16,7 +16,7 @@ import com.patricklarocque.recallos.core.database.entity.SpaceEntity
         SpaceEntity::class,
     ],
     version = 1,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class RecallOsDatabase : RoomDatabase() {
     abstract fun memoryItemDao(): MemoryItemDao
