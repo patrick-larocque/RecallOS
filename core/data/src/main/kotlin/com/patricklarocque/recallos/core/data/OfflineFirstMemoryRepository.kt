@@ -16,6 +16,7 @@ class OfflineFirstMemoryRepository @Inject constructor(
     private val database: RecallOsDatabase,
     private val memoryItemDao: MemoryItemDao,
     private val fileStore: MemoryFileStore,
+    private val ingestionScheduler: IngestionScheduler,
 ) : MemoryRepository {
     override suspend fun saveRawMemory(input: NewMemoryInput): MemoryItem {
         val memoryItemId = UUID.randomUUID().toString()
@@ -48,6 +49,7 @@ class OfflineFirstMemoryRepository @Inject constructor(
             database.withTransaction {
                 memoryItemDao.upsert(entity)
             }
+            ingestionScheduler.schedule(memoryItemId)
             entity.toModel()
         } catch (throwable: Throwable) {
             fileStore.deleteRawContent(storedRawContent.path)

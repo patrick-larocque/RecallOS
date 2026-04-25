@@ -27,10 +27,14 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
+    implementation(project(":core:data"))
     implementation(project(":core:database"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:files"))
+    implementation(project(":core:ingestion"))
     implementation(project(":core:model"))
     implementation(project(":core:navigation"))
+    implementation(project(":feature:capture"))
     implementation(project(":feature:home"))
     implementation(project(":feature:search"))
     implementation(project(":feature:spaces"))
@@ -42,6 +46,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.hiltCompilerExtensions)
+    implementation(libs.androidx.work.runtime.ktx)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
