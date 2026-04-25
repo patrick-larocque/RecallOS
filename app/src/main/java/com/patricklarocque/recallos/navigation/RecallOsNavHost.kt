@@ -13,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.patricklarocque.recallos.core.navigation.RecallDestination
+import com.patricklarocque.recallos.feature.capture.CaptureScreen
 import com.patricklarocque.recallos.feature.home.HomeScreen
 import com.patricklarocque.recallos.feature.search.SearchScreen
 import com.patricklarocque.recallos.feature.settings.SettingsScreen
@@ -63,7 +64,13 @@ fun RecallOsNavHost() {
             startDestination = RecallDestination.Home.route,
         ) {
             composable(RecallDestination.Home.route) {
-                HomeScreen(contentPadding = paddingValues)
+                HomeScreen(
+                    contentPadding = paddingValues,
+                    onNewNote = { navController.navigate(RecallDestination.Capture.route) },
+                )
+            }
+            composable(RecallDestination.Capture.route) {
+                CaptureScreen(onSaved = { navController.popBackStack() })
             }
             composable(RecallDestination.Search.route) {
                 SearchScreen(contentPadding = paddingValues)
