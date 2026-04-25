@@ -12,6 +12,7 @@ class RecallOsTestConventionPlugin : Plugin<Project> {
 
             dependencies.add("testImplementation", libs.library("junit4"))
             dependencies.add("testImplementation", libs.library("truth"))
+            dependencies.add("testImplementation", libs.library("kotlinx-coroutines-test"))
 
             pluginManager.withPlugin("com.android.application") {
                 configureAndroidTests(libs)

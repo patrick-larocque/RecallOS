@@ -27,10 +27,13 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
+    implementation(project(":core:data"))
     implementation(project(":core:database"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:files"))
     implementation(project(":core:model"))
     implementation(project(":core:navigation"))
+    implementation(project(":feature:capture"))
     implementation(project(":feature:home"))
     implementation(project(":feature:search"))
     implementation(project(":feature:spaces"))
