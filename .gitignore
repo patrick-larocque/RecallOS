@@ -4,3 +4,16 @@ local.properties
 captures/
 *.iml
 **/build/
+
+# IntelliJ / Android Studio metadata
+.idea/*
+!.idea/.gitignore
+!.idea/codeStyles/
+!.idea/codeStyles/**
+
+# Local tooling metadata
+.claude/
+.claire/
+
+# Local Gradle daemon JVM preference
+gradle/gradle-daemon-jvm.properties
