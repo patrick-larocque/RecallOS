@@ -8,4 +8,6 @@ data class NewMemoryInput(
     val title: String?,
     val rawContent: RawMemoryContent,
     val spaceId: String? = null,
+    val sourceUri: String? = null,
+    val capturedAt: Long? = null,
 )

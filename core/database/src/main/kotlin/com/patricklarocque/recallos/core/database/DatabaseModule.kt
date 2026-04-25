@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.patricklarocque.recallos.core.database.dao.MemoryChunkDao
 import com.patricklarocque.recallos.core.database.dao.MemoryItemDao
 import com.patricklarocque.recallos.core.database.dao.SpaceDao
+import com.patricklarocque.recallos.core.database.dao.VectorEmbeddingDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,4 +39,7 @@ object DatabaseModule {
 
     @Provides
     fun provideSpaceDao(database: RecallOsDatabase): SpaceDao = database.spaceDao()
+
+    @Provides
+    fun provideVectorEmbeddingDao(database: RecallOsDatabase): VectorEmbeddingDao = database.vectorEmbeddingDao()
 }

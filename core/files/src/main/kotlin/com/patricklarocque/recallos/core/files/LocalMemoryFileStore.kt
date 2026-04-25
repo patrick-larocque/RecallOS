@@ -3,7 +3,9 @@ package com.patricklarocque.recallos.core.files
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.security.MessageDigest
 import javax.inject.Inject
 
@@ -14,15 +16,40 @@ class LocalMemoryFileStore @Inject constructor(
         memoryItemId: String,
         content: RawMemoryContent,
     ): StoredRawContent {
+        return saveRawContent(
+            memoryItemId = memoryItemId,
+            originalFileName = content.originalFileName,
+            mimeType = content.mimeType,
+            inputStream = content.bytes.inputStream(),
+        )
+    }
+
+    override suspend fun saveRawContent(
+        memoryItemId: String,
+        originalFileName: String?,
+        mimeType: String?,
+        inputStream: InputStream,
+    ): StoredRawContent {
         val itemDirectory = File(rawContentRoot(), memoryItemId).apply {
             mkdirs()
         }
-        val targetFile = File(itemDirectory, buildFileName(content.originalFileName))
+        val targetFile = File(itemDirectory, buildFileName(originalFileName))
         val tempFile = File(itemDirectory, "${targetFile.name}.tmp")
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        var sizeBytes = 0L
 
-        FileOutputStream(tempFile).use { stream ->
-            stream.write(content.bytes)
-            stream.channel.force(true)
+        inputStream.use { input ->
+            FileOutputStream(tempFile).use { output ->
+                while (true) {
+                    val bytesRead = input.read(buffer)
+                    if (bytesRead == -1) break
+                    output.write(buffer, 0, bytesRead)
+                    digest.update(buffer, 0, bytesRead)
+                    sizeBytes += bytesRead
+                }
+                output.channel.force(true)
+            }
         }
 
         if (!tempFile.renameTo(targetFile)) {
@@ -32,13 +59,21 @@ class LocalMemoryFileStore @Inject constructor(
 
         return StoredRawContent(
             path = targetFile.absolutePath,
-            sizeBytes = targetFile.length(),
-            sha256 = sha256(content.bytes),
+            sizeBytes = sizeBytes,
+            sha256 = digest.digest().toHexString(),
         )
     }
 
+    override suspend fun openRawContent(path: String): InputStream {
+        return FileInputStream(File(path))
+    }
+
     override suspend fun deleteRawContent(path: String) {
-        File(path).delete()
+        val file = File(path)
+        if (file.exists() && !file.delete()) {
+            error("Unable to delete raw content at $path")
+        }
+        file.parentFile?.delete()
     }
 
     private fun rawContentRoot(): File {
@@ -56,8 +91,5 @@ class LocalMemoryFileStore @Inject constructor(
         return safeName ?: "raw-content.bin"
     }
 
-    private fun sha256(bytes: ByteArray): String {
-        val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
-        return digest.joinToString(separator = "") { byte -> "%02x".format(byte) }
-    }
+    private fun ByteArray.toHexString(): String = joinToString(separator = "") { byte -> "%02x".format(byte) }
 }

@@ -66,6 +66,9 @@ Stores:
 Stores:
 - embedding vectors
 - references to chunk IDs
+- local embedding metadata such as model ID and dimensions
+
+The storage layer may persist vectors before retrieval is implemented. Similarity search, ranking, and query-time retrieval remain in `core/search`.
 
 ### File storage
 
@@ -74,6 +77,8 @@ Stores:
 - PDFs
 - audio
 - attachments
+
+Raw file storage is app-private and must be written before metadata, ingestion, or AI processing is treated as successful.
 
 ## Ingestion pipeline
 

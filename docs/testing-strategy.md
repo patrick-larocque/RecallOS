@@ -16,6 +16,13 @@ Ensure reliability of capture, ingestion, retrieval, and AI-assisted features.
 - ingestion pipeline
 - background workers
 
+### Storage foundation tests
+- raw content is persisted before metadata writes
+- metadata write failure cleans up newly written raw content
+- file metadata, checksum, and sync status are persisted locally
+- vector embeddings are stored by chunk ID without invoking retrieval logic
+- deletes preserve database/file consistency
+
 ### UI tests
 - capture flows
 - search flows

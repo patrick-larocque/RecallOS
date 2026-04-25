@@ -29,12 +29,27 @@ data class MemoryItemEntity(
     val title: String?,
     @ColumnInfo(name = "raw_content_path")
     val rawContentPath: String?,
+    @ColumnInfo(name = "original_file_name")
+    val originalFileName: String?,
+    @ColumnInfo(name = "mime_type")
+    val mimeType: String?,
+    @ColumnInfo(name = "size_bytes")
+    val sizeBytes: Long,
+    val sha256: String?,
     @ColumnInfo(name = "extracted_text")
     val extractedText: String?,
     @ColumnInfo(name = "processing_status")
     val processingStatus: String,
+    @ColumnInfo(name = "sync_status")
+    val syncStatus: String,
+    @ColumnInfo(name = "failure_reason")
+    val failureReason: String?,
     @ColumnInfo(name = "space_id")
     val spaceId: String?,
+    @ColumnInfo(name = "source_uri")
+    val sourceUri: String?,
+    @ColumnInfo(name = "captured_at")
+    val capturedAt: Long,
     @ColumnInfo(name = "created_at")
     val createdAt: Long,
     @ColumnInfo(name = "updated_at")
