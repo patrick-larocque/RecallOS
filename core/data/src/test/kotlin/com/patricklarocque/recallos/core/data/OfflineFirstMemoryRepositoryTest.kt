@@ -25,6 +25,7 @@ import org.robolectric.RobolectricTestRunner
 class OfflineFirstMemoryRepositoryTest {
     private lateinit var database: RecallOsDatabase
     private lateinit var fileStore: RecordingMemoryFileStore
+    private lateinit var ingestionScheduler: RecordingIngestionScheduler
     private lateinit var repository: OfflineFirstMemoryRepository
 
     @Before
@@ -36,10 +37,12 @@ class OfflineFirstMemoryRepositoryTest {
             .allowMainThreadQueries()
             .build()
         fileStore = RecordingMemoryFileStore()
+        ingestionScheduler = RecordingIngestionScheduler()
         repository = OfflineFirstMemoryRepository(
             database = database,
             memoryItemDao = database.memoryItemDao(),
             fileStore = fileStore,
+            ingestionScheduler = ingestionScheduler,
         )
     }
 
@@ -86,6 +89,8 @@ class OfflineFirstMemoryRepositoryTest {
         assertThat(storedEntity?.sourceUri).isEqualTo("content://clipboard/item")
         assertThat(storedEntity?.capturedAt).isEqualTo(123L)
         assertThat(saved.extractedText).isNull()
+        assertThat(ingestionScheduler.scheduledMemoryItemIds).containsExactly(saved.id)
+        Unit
     }
 
     @Test
@@ -95,6 +100,7 @@ class OfflineFirstMemoryRepositoryTest {
                 database = database,
                 memoryItemDao = FailingMemoryItemDao(),
                 fileStore = fileStore,
+                ingestionScheduler = ingestionScheduler,
             )
 
             val result = runCatching {
@@ -113,6 +119,7 @@ class OfflineFirstMemoryRepositoryTest {
             assertThat(result.isFailure).isTrue()
             assertThat(fileStore.savedMemoryItemIds).hasSize(1)
             assertThat(fileStore.deletedPaths).containsExactly("/raw/${fileStore.savedMemoryItemIds.single()}")
+            assertThat(ingestionScheduler.scheduledMemoryItemIds).isEmpty()
         }
     }
 
@@ -123,6 +130,7 @@ class OfflineFirstMemoryRepositoryTest {
                 database = database,
                 memoryItemDao = database.memoryItemDao(),
                 fileStore = ThrowingMemoryFileStore(),
+                ingestionScheduler = ingestionScheduler,
             )
 
             val result = runCatching {
@@ -140,6 +148,7 @@ class OfflineFirstMemoryRepositoryTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat(database.memoryItemDao().getAll()).isEmpty()
+            assertThat(ingestionScheduler.scheduledMemoryItemIds).isEmpty()
         }
     }
 
@@ -207,6 +216,7 @@ class OfflineFirstMemoryRepositoryTest {
                 database = database,
                 memoryItemDao = FailingDeleteMemoryItemDao(item),
                 fileStore = fileStore,
+                ingestionScheduler = ingestionScheduler,
             )
 
             val result = runCatching {
@@ -215,6 +225,14 @@ class OfflineFirstMemoryRepositoryTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat(fileStore.deletedPaths).isEmpty()
+        }
+    }
+
+    private class RecordingIngestionScheduler : IngestionScheduler {
+        val scheduledMemoryItemIds = mutableListOf<String>()
+
+        override fun schedule(memoryItemId: String) {
+            scheduledMemoryItemIds += memoryItemId
         }
     }
 
