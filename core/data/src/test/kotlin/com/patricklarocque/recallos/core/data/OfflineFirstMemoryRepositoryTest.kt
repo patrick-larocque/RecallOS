@@ -181,6 +181,43 @@ class OfflineFirstMemoryRepositoryTest {
         }
     }
 
+    @Test
+    fun deleteMemoryDoesNotDeleteRawContentWhenMetadataDeleteFails() {
+        runBlocking {
+            val item = MemoryItemEntity(
+                id = "memory-delete-fails",
+                type = MemoryType.NOTE.name,
+                title = "Delete failure",
+                rawContentPath = "/raw/memory-delete-fails",
+                originalFileName = "delete.txt",
+                mimeType = "text/plain",
+                sizeBytes = 6L,
+                sha256 = "test-sha",
+                extractedText = null,
+                processingStatus = ProcessingStatus.PENDING.name,
+                syncStatus = SyncStatus.LOCAL_ONLY.name,
+                failureReason = null,
+                spaceId = null,
+                sourceUri = null,
+                capturedAt = 100L,
+                createdAt = 100L,
+                updatedAt = 100L,
+            )
+            val failingRepository = OfflineFirstMemoryRepository(
+                database = database,
+                memoryItemDao = FailingDeleteMemoryItemDao(item),
+                fileStore = fileStore,
+            )
+
+            val result = runCatching {
+                failingRepository.deleteMemory(item.id)
+            }
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(fileStore.deletedPaths).isEmpty()
+        }
+    }
+
     private open class RecordingMemoryFileStore : MemoryFileStore {
         val savedMemoryItemIds = mutableListOf<String>()
         val deletedPaths = mutableListOf<String>()
@@ -257,5 +294,34 @@ class OfflineFirstMemoryRepositoryTest {
         ) = Unit
 
         override suspend fun deleteById(id: String) = Unit
+    }
+
+    private class FailingDeleteMemoryItemDao(
+        private val item: MemoryItemEntity,
+    ) : MemoryItemDao {
+        override suspend fun upsert(item: MemoryItemEntity) = Unit
+
+        override suspend fun getById(id: String): MemoryItemEntity? = item.takeIf { it.id == id }
+
+        override suspend fun getAll(): List<MemoryItemEntity> = emptyList()
+
+        override suspend fun getRecent(limit: Int): List<MemoryItemEntity> = emptyList()
+
+        override suspend fun updateProcessingStatus(
+            id: String,
+            status: String,
+            failureReason: String?,
+            updatedAt: Long,
+        ) = Unit
+
+        override suspend fun updateExtractedText(
+            id: String,
+            extractedText: String?,
+            updatedAt: Long,
+        ) = Unit
+
+        override suspend fun deleteById(id: String) {
+            error("metadata delete failed")
+        }
     }
 }

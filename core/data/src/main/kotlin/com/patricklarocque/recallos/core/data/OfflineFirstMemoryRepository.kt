@@ -91,11 +91,11 @@ class OfflineFirstMemoryRepository @Inject constructor(
 
     override suspend fun deleteMemory(id: String) {
         val memoryItem = memoryItemDao.getById(id) ?: return
-        memoryItem.rawContentPath?.let { path ->
-            fileStore.deleteRawContent(path)
-        }
         database.withTransaction {
             memoryItemDao.deleteById(id)
+        }
+        memoryItem.rawContentPath?.let { path ->
+            fileStore.deleteRawContent(path)
         }
     }
 }
